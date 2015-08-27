@@ -2,7 +2,12 @@
 
 PATHWAY=$1
 
-curl -s http://rest.kegg.jp/get/path:$PATHWAY |
+# List pathway by
+# curl -s http://rest.kegg.jp/list/pathway/hsa
+curl -s http://rest.kegg.jp/get/$PATHWAY |
 gawk '/^GENE/ {seen = 1 } seen {print}' |
-sed -n '/^COMPOUND/q;p' |
-perl -pe 's/^GENE\s+|\s+//'
+sed '1s/^GENE//g' |
+sed -n '/^[^ ]/q;p' |
+sed 's/^[ \t]*//' |
+gawk '{print $1}'
+exit 0

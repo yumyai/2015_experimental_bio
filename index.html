@@ -130,6 +130,7 @@ cat 01.fa 02.fa 03.fa | grep ">" | wc -l
         </section>
         <section>
           <h2>API - Application Programming Interface</h2>
+          <p>http://www.kegg.jp/kegg/rest/keggapi.html</p>
         </section>
         <section>
           <section>
@@ -141,9 +142,10 @@ curl -s -X GET "http://rest.kegg.jp/list/pathway"
             </code></pre>
           </section>
           <section>
-            <h2>BLAST</h2>
+            <h2>Bonus: BLAST</h2>
             <pre><code data-trim contenteditable>
 curl -s -X POST "http://www.ebi.ac.uk/Tools/services/rest/ncbiblast/run" --data "email=yumyai%40gmail.com&stype=protein&program=blastp&database=uniprotkb&sequence=%3Eseq1%20Some%20sequence%0AMAGAKEIRSKIASVQNTQKITKAMEMVAASKMRKSQDRMAASRPYAETMRKVIG"
+curl -s -X GET "http://www.ebi.ac.uk/Tools/services/rest/ncbiblast/----YOUR ID----/"
 curl -s -X GET "http://www.ebi.ac.uk/Tools/services/rest/ncbiblast/result/----YOUR ID-----/out?format=6"
             </code></pre>
           </section>
@@ -154,46 +156,94 @@ curl -s -X GET "http://www.ebi.ac.uk/Tools/services/rest/ncbiblast/result/----YO
             <pre><code data-trim contenteditable>
 # open http://rest.kegg.jp/list/pathway/cre in browser or curl it
 
-curl -s http://rest.kegg.jp/get/path:$PATHWAY
+PATHWAY="path:cre03440"
+curl -s http://rest.kegg.jp/get/$PATHWAY
 gawk '/^GENE/ {seen = 1 } seen {print}' |
-sed -n '/^COMPOUND/q;p' |
-perl -pe 's/^GENE\s+|\s+//' |
+sed '1s/^GENE//g' |
+sed -n '/^[^ ]/q;p' |
+sed 's/^[ \t]*//' |
 gawk '{print $1}'
             </code></pre>
           </section>
           <section>
             <pre><code data-trim contenteditable>
-curl -s http://rest.kegg.jp/get/path:$PATHWAY
+PATHWAY="path:cre03440"
+curl -s http://rest.kegg.jp/get/$PATHWAY
             </code></pre>
           </section>
           <section>
             <pre><code data-trim contenteditable>
-curl -s http://rest.kegg.jp/get/path:$PATHWAY |
+PATHWAY="path:cre03440"
+curl -s http://rest.kegg.jp/get/$PATHWAY |
 gawk '/^GENE/ {seen = 1 } seen {print}'
             </code></pre>
           </section>
           <section>
             <pre><code data-trim contenteditable>
-curl -s http://rest.kegg.jp/get/path:$PATHWAY |
+PATHWAY="path:cre03440"
+curl -s http://rest.kegg.jp/get/$PATHWAY |
 gawk '/^GENE/ {seen = 1 } seen {print}' |
-sed -n '/^COMPOUND/q;p'
+sed '1s/^GENE//g'
             </code></pre>
           </section>
           <section>
             <pre><code data-trim contenteditable>
-curl -s http://rest.kegg.jp/get/path:$PATHWAY |
+PATHWAY="path:cre03440"
+curl -s http://rest.kegg.jp/get/$PATHWAY |
 gawk '/^GENE/ {seen = 1 } seen {print}' |
-sed -n '/^COMPOUND/q;p' |
-perl -pe 's/^GENE\s+|\s+//'
+sed '1s/^GENE//g' |
+sed -n '/^[^ ]/q;p'
+            </code></pre>
+          </section>
+          <section>
+            <pre><code data-trim contenteditable>
+PATHWAY="path:cre03440"
+curl -s http://rest.kegg.jp/get/$PATHWAY |
+gawk '/^GENE/ {seen = 1 } seen {print}' |
+sed '1s/^GENE//g' |
+sed -n '/^[^ ]/q;p' |
+sed 's/^[ \t]*//'
+            </code></pre>
+          </section>
+          <section>
+            <pre><code data-trim contenteditable>
+PATHWAY="path:cre03440"
+curl -s http://rest.kegg.jp/get/$PATHWAY |
+gawk '/^GENE/ {seen = 1 } seen {print}' |
+sed '1s/^GENE//g' |
+sed -n '/^[^ ]/q;p' |
+sed 's/^[ \t]*//' |
+gawk '{print $1}'
+exit 0
             </code></pre>
           </section>
         </section>
         <section>
+          <h2>Get FASTA file</h2>
+          <pre><code data-trim contenteditable>
+GENE="CHLREDRAFT_195401"
+curl -s "http://rest.kegg.jp/get/$GENE/aaseq"
+          </code></pre>
+        </section>
+        <section>
+          <h2>Put them into script</h2>
+          <p>See 02_kegg.sh and 03_getaa.sh</p>
+        </section>
+        <section>
+          <h2>Let go</h2>
+          <pre><code data-trim contenteditable>
+sh 02_kegg.sh cre00860 | sed 's/^/cre:/' | xargs -I{} sh 03_getaa.sh {}
+sh 02_kegg.sh hsa04740 | sed 's/^/hsa:/' | xargs -I{} sh 03_getaa.sh {}
+          </code></pre>
+        </section>
+        <section>
 					<h2>I don't understand?</h2>
+          <p>The point of this lecture is to understand how programs are working together.</p>
           <img src="assets/images/itsomethingwrong.jpg">
         </section>
         <section>
 					<h2>What to do if something is wrong</h2>
+          <p>Test them.</p>
           <img src="assets/images/itwentwrong.jpg">
         </section>
 				<section>
@@ -203,8 +253,21 @@ perl -pe 's/^GENE\s+|\s+//'
 				</section>
 
 				<section style="text-align: left;">
-					<h1>THE END</h1>
-					<p></p>
+          <section>
+            <h2>THE END</h2>
+            <p></p>
+          </section>
+          <section>
+            <h2>Quiz</h2>
+            <ul>
+              <li>Create 04_getnt.sh that get nucleotide instead of amino acid that work seemlessly with an old pipeline
+              <pre><code data-trim contenteditable>
+sh 02_kegg.sh hsa04740 | sed 's/^/hsa:/' | xargs -I{} sh 04_getnt.sh {}
+              </code></pre>
+              </li>
+              <li>Hint: we used the url "http://rest.kegg.jp/get/$GENE/aaseq" to get aa sequence.</li>
+            </ul>
+          </section>
 				</section>
 
 			</div>
